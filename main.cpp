@@ -4,6 +4,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <bitset>
+#include "BitWriter.h"
 
 using namespace std;
 
@@ -29,9 +30,14 @@ class Node {
             if (lChild != nullptr) lChild->Print();
             if (rChild != nullptr) rChild->Print();
         }
-        void writeTree() {
-            if (lChild == nullptr && rChild == nullptr) { // inner
-                
+        void writeTree(BitWriter &out) {
+            if (lChild == nullptr && rChild == nullptr) { // leaf
+                out.write_bits(1, 0b1); // write 1
+                out.write_bits(8, ch); // write char
+            } else { // inner
+                out.write_bits(1, 0b0);
+                lChild->writeTree(out);
+                rChild->writeTree(out);
             }
         }
         void getEncs(unordered_map<char, int> &encs, int path) {
@@ -69,6 +75,12 @@ class Tree {
         void Print() {
             root->Print();
         }
+        void WriteTree(string filename) {
+            BitWriter outfile(filename);
+            root->writeTree(outfile);
+
+            outfile.flush();
+        }
         unordered_map<char, int> getEncodings() {
             unordered_map<char, int> enc;
             // traversal
@@ -89,7 +101,7 @@ void print_vec(const vector<entry> &vec) {
     cout << s << endl;
 }
 
-void PrintForest(vector<Tree*> f) {
+void PrintForest(vector<Tree*> &f) {
     int lineReturn = 0;
     for (int i = 0; i < f.size(); i++) {
         cout << f[i]->getRoot()->getChar() << " " << f[i]->getRoot()->getCount() << "    ";
@@ -102,9 +114,8 @@ void PrintForest(vector<Tree*> f) {
     cout << endl;
 }
 
-int main() {
-    ifstream ifs("lorem.txt", ifstream::in);
-    vector<entry> chars;
+void getCharFreq(string filename, vector<entry> &chars) {
+    ifstream ifs(filename, ifstream::in);
 
     int fileCharCount = 0;
     while (ifs.good()) {
@@ -127,17 +138,9 @@ int main() {
     }
 
     ifs.close();
+}
 
-    vector<Tree*> forest;
-    for (int i = 0; i < chars.size(); i++) {
-        if (chars[i].ch == -1) continue; // don't create node for EOF
-        Tree *newTree = new Tree(chars[i]);
-        forest.push_back(newTree);
-    }
-
-    PrintForest(forest);
-    cout << "forest size: " << forest.size() << endl;
-
+void CreateHuffmanTree(vector<Tree*> &forest) {
     while (forest.size() > 1) {
         // find two smallest weighted trees and remove from forest
         int min1 = 1000, minInd1 = 0;
@@ -162,16 +165,28 @@ int main() {
         // add tree to forest
         forest.push_back(joinedTree);
     }
+}
 
-    //PrintForest(forest);
+int main() {
+    
+    vector<entry> chars;
+    getCharFreq("lorem.txt", chars);  
 
+    // initialize forest with singleton trees
+    vector<Tree*> forest;
+    for (int i = 0; i < chars.size(); i++) {
+        if (chars[i].ch == -1) continue; // don't create node for EOF
+        Tree *newTree = new Tree(chars[i]);
+        forest.push_back(newTree);
+    }
+
+    cout << "forest size: " << forest.size() << endl;
+    CreateHuffmanTree(forest); // merge trees into huffman tree
     cout << "-------" << endl;
     cout << "forest size: " << forest.size() << endl;
 
-    //forest[0]->Print();
-
+    // view encodings, not needed
     unordered_map<char, int> encodings = forest[0]->getEncodings();
-    
     for (auto i: encodings) {
         bitset<32> enc(i.second);
         if (i.first != '\n') {
@@ -181,11 +196,10 @@ int main() {
         }
     }
 
-    ofstream ofs("compressed.txt", ofstream::out);
+    // write tree to file
+    forest[0]->WriteTree("treeOut");
 
-    for (auto i: encodings) { // write encodings to file
-
-    }
+    // write encoded data to file
 
     return 0;
 }

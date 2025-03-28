@@ -6,7 +6,11 @@ BitWriter::BitWriter(string filename) {
     out = new ofstream(filename);
 }
 
-int BitWriter::write_bits(int num_bits, int data) {
+BitWriter::~BitWriter() {
+    delete out;
+}
+
+int BitWriter::write_bits(int num_bits, unsigned long long int data) {
     // writes to buffer and left justifies
     if (num_bits + counter > 64) { // error
         cout << "will overwrite content of buffer" << endl;

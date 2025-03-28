@@ -14,7 +14,8 @@ class BitWriter {
         int counter = 0;
     public:
         BitWriter(string filename);
-        int write_bits(int num_bits, int data);
+        ~BitWriter();
+        int write_bits(int num_bits, unsigned long long int data);
         void flush();
     private:
         void _write();
