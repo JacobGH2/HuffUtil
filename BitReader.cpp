@@ -21,7 +21,19 @@ public:
     ~BitReader() {
         delete ifs;
     }
-    int read_bits(int num_bits, unsigned long long int &data_ret) {
+    char read_char() {
+        unsigned long long int data;
+        _read_bits(8, data);
+        return (char) data;
+    }
+    int read_bit() {
+        unsigned long long int data;
+        _read_bits(1, data);
+        return (bool) data;
+    }
+    
+private:
+    int _read_bits(int num_bits, unsigned long long int &data_ret) {
         if (num_bits > 64) { 
             cout << "too many bits read\n"; 
             return -1;
@@ -36,8 +48,7 @@ public:
 
         this->_print_buffer();
         return num_bits;
-    }
-private:
+    }            
     void _print_buffer() {
         bitset<64> bs(buffer);
         cout << "buffer: " << bs << endl;
