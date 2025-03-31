@@ -33,12 +33,12 @@ public:
         data_ret = _read_value_from_buffer(num_bits);
         _left_adj_buffer(num_bits);
         _refill_buffer();
-        this->print_buffer();
 
+        this->_print_buffer();
         return num_bits;
     }
 private:
-    void print_buffer() {
+    void _print_buffer() {
         bitset<64> bs(buffer);
         cout << "buffer: " << bs << endl;
     }
@@ -51,13 +51,9 @@ private:
                 counter += 8;
             } else break;
         }
-        cout << counter << endl;
         if (counter < 64) { // less than 8 bytes read, needs to be left adjusted
-            cout << "counter less than 64 on init" << endl;
-            buffer <<= ((64-counter)/8);
+            buffer <<= (64-counter);
         }
-
-        this->print_buffer();
     }
     unsigned long long int _read_value_from_buffer(int num_bits) {
         unsigned long long int mask = 1;
@@ -78,10 +74,11 @@ private:
         while (counter <= (64-8)){ // space for another byte
             char curr;
             if (ifs->get(curr)) {
-                buffer |= curr;
+                buffer |= (unsigned char) curr;
                 counter += 8;
             } else {
                 eof_flag = 1;
+                break;
             }
         }
         // on break: no space without writing past bounds, buffer is full
