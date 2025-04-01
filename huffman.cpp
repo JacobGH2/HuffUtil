@@ -4,6 +4,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <bitset>
+#include <math.h>
 #include "BitWriter.h"
 #include "huffman.h"
 
@@ -116,7 +117,14 @@ int main() {
     forest[0]->WriteTree("treeOut");
 
     // write encoded data to file
-    // TODO
+    ifstream ifs("lorem.txt");
+    BitWriter bw("treeOut");
+    char curr;
+    while (ifs.get(curr)) {
+        unsigned long long int enc = encodings[curr];
+        int length = enc != 0 ? log2(enc) + 1 : 2; // TODO: for this input file specifically, needs to be changed
+        bw.write_bits(length, enc);
+    }
 
     // ---------- Decoding --------------
     // read and construct tree from file

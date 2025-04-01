@@ -3,7 +3,7 @@
 using namespace std;
     
 BitWriter::BitWriter(string filename) {
-    out = new ofstream(filename);
+    out = new ofstream(filename, ofstream::app);
 }
 
 BitWriter::~BitWriter() {
