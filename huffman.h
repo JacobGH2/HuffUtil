@@ -1,5 +1,9 @@
 #include "BitWriter.h"
+#include "BitReader.h"
 #include <unordered_map>
+#include <iostream>
+
+using namespace std;
 
 typedef struct {
     char ch;
@@ -17,6 +21,23 @@ class Node {
             this->count = count;
             lChild = lc;
             rChild = rc;
+        }
+        Node(BitReader *br) {
+            int type = 0;
+            if (br->valid_data_remaining() >= 1) {
+                type = br->read_bit();
+            }
+            if (type == 1) {
+                if (br->valid_data_remaining() >= 8) {
+                    ch = br->read_char();
+                }
+            } else {
+                if (br->valid_data_remaining() > 0) {
+                    this->lChild = new Node(br);
+                    this->rChild = new Node(br);
+                } 
+            }
+            count = -1;
         }
         void Print() {
             cout << ch << endl;
@@ -65,6 +86,10 @@ class Tree {
         }
         Tree(Tree *t1, Tree *t2) {
             root = new Node(t1->root->getCount() + t2->root->getCount(), t1->root, t2->root);
+        }
+        Tree(string filename) {
+            BitReader *br = new BitReader(filename);
+            root = new Node(br); 
         }
         void Print() {
             root->Print();

@@ -84,7 +84,7 @@ void CreateHuffmanTree(vector<Tree*> &forest) {
 }
 
 int main() {
-    
+    // ---------- Encoding --------------
     vector<entry> chars;
     getCharFreq("lorem.txt", chars);  
 
@@ -116,6 +116,13 @@ int main() {
     forest[0]->WriteTree("treeOut");
 
     // write encoded data to file
+    // TODO
+
+    // ---------- Decoding --------------
+    // read and construct tree from file
+    Tree conTree("treeOut");
+
+    // read encoding and output uncompressed file
 
     return 0;
 }
