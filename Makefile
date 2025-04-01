@@ -1,29 +1,14 @@
-CFLAGS = -std=c++11
+CFLAGS = -std=c++11 -Wall -Wextra
+CC = g++
 
-test: BitWriter.o test.o
-	g++ ${CFLAGS} BitWriter.o test.o -o test
+SRCS = huffman.cpp BitReader.cpp BitWriter.cpp
+OBJS = $(SRCS:.cpp=.o)
 
-test2: BitReader.o test2.o
-	g++ ${CFLAGS} BitReader.o test2.o -o test2
+huffman: ${OBJS}
+	${CC} ${CFLAGS} $^ -o $@
 
-BitReader.o: BitReader.cpp BitReader.h
-	g++ ${CFLAGS} BitReader.cpp -c
-
-main: main.o BitWriter.o
-	g++ ${CFLAGS} main.o BitWriter.o -o main
-
-main.o: main.cpp Bitwriter.h
-	g++ ${CFLAGS} main.cpp -c
-
-BitWriter.o: BitWriter.cpp BitWriter.h
-	g++ ${CFLAGS} BitWriter.cpp -c
-
-test.o: test.cpp BitWriter.h
-	g++ ${CFLAGS} test.cpp -c
-
-test2.o: test2.cpp BitReader.h
-	g++ ${CFLAGS} test2.cpp -c
+%.o: %.cpp
+	${CC} ${CFLAGS} -c $< -o $@
 
 clean:
-	rm test test2 main *.o
-
+	rm huffman treeOut ${OBJS}
