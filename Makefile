@@ -6,7 +6,7 @@ test: BitWriter.o test.o
 test2: BitReader.o test2.o
 	g++ ${CFLAGS} BitReader.o test2.o -o test2
 
-BitReader.o: BitReader.cpp
+BitReader.o: BitReader.cpp BitReader.h
 	g++ ${CFLAGS} BitReader.cpp -c
 
 main: main.o BitWriter.o
@@ -21,7 +21,7 @@ BitWriter.o: BitWriter.cpp BitWriter.h
 test.o: test.cpp BitWriter.h
 	g++ ${CFLAGS} test.cpp -c
 
-test2.o: test2.cpp
+test2.o: test2.cpp BitReader.h
 	g++ ${CFLAGS} test2.cpp -c
 
 clean:
