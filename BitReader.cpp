@@ -8,9 +8,9 @@ using namespace std;
 class BitReader {
 private:
     ifstream * ifs;
-    unsigned long long int buffer = 0;
-    int counter = 0;
-    int eof_flag = 0;
+    unsigned long long int buffer = 0; // buffer of binary data
+    int counter = 0; // bits of valid data in buffer
+    int eof_flag = 0; // signals that wrapped file stream has terminated
 
 public:
     BitReader(string filename) {
@@ -31,6 +31,9 @@ public:
         _read_bits(1, data);
         return (bool) data;
     }
+    int valid_data_remaining() {
+        return counter;
+    }
     
 private:
     int _read_bits(int num_bits, unsigned long long int &data_ret) {
@@ -43,10 +46,8 @@ private:
             return -1;
         }
         data_ret = _read_value_from_buffer(num_bits);
-        _left_adj_buffer(num_bits);
-        _refill_buffer();
+        _adj_and_refill(num_bits);
 
-        this->_print_buffer();
         return num_bits;
     }            
     void _print_buffer() {
@@ -76,9 +77,12 @@ private:
         unsigned long long int value = (buffer & mask) >> (64-num_bits);
         return value;
     }
-    void _left_adj_buffer(int num_bits) {
-        buffer <<= num_bits;
-        counter -= num_bits;
+    void _adj_and_refill(int num_bits) {
+        for (int i = 0; i < num_bits; i++) {
+            buffer <<= 1;
+            counter -= 1;
+            _refill_buffer();
+        }
     }
     void _refill_buffer() {
         if (eof_flag) return;
