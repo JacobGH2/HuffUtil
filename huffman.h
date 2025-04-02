@@ -22,7 +22,7 @@ class Node {
             lChild = lc;
             rChild = rc;
         }
-        Node(BitReader *br) {
+        Node(BitReader *br, int ps) {
             int type = 0;
             if (br->valid_data_remaining() >= 1) {
                 type = br->read_bit();
@@ -33,8 +33,8 @@ class Node {
                 }
             } else {
                 if (br->valid_data_remaining() > 0) {
-                    this->lChild = new Node(br);
-                    this->rChild = new Node(br);
+                    this->lChild = new Node(br, ps+1);
+                    this->rChild = new Node(br, ps+1);
                 } 
             }
             count = -1;
@@ -58,17 +58,29 @@ class Node {
             if (lChild != nullptr || rChild != nullptr) { // inner
                 // path has been shifted appropriately
                 // add and shift
-                lChild->getEncs(encs, ((path) << 1));
-                rChild->getEncs(encs, ((path+1) << 1));
+                lChild->getEncs(encs, (path << 1) );
+                rChild->getEncs(encs, ((path<< 1) + 1));
             } else { // leaf
                 encs.insert({this->ch, path});
+            }
+        }
+        void getSizes(unordered_map<char, int> &sizes, int pathSize) {
+            if (lChild != nullptr || rChild != nullptr) { // inner
+                // path has been shifted appropriately
+                // add and shift
+                lChild->getSizes(sizes, pathSize+1);
+                rChild->getSizes(sizes, pathSize+1);
+            } else { // leaf
+                sizes.insert({this->ch, pathSize});
             }
         }
 
         int getCount() {return count;}
         char getChar() {return ch;}
+        Node * getLeft() {return lChild;}
+        Node * getRight() {return rChild;}
     private:
-        char ch;
+        char ch = -1;
         int count;
         Node * lChild = nullptr;
         Node * rChild = nullptr;
@@ -77,6 +89,7 @@ class Node {
 class Tree {
     private:
         Node * root;
+        BitReader * br = 0;
     public:
         Tree(Node * e) {    
             root = e;
@@ -88,11 +101,14 @@ class Tree {
             root = new Node(t1->root->getCount() + t2->root->getCount(), t1->root, t2->root);
         }
         Tree(string filename) {
-            BitReader *br = new BitReader(filename);
-            root = new Node(br); 
+            br = new BitReader(filename);
+            root = new Node(br, 0); 
         }
         void Print() {
             root->Print();
+        }
+        BitReader* getBR() {
+            return br;
         }
         void WriteTree(string filename) {
             BitWriter outfile(filename);
@@ -105,6 +121,12 @@ class Tree {
             // traversal
             this->root->getEncs(enc, 0);
             return enc;
+        }
+        unordered_map<char, int> getPathSizes() {
+            unordered_map<char, int> sizes;
+            // traversal
+            this->root->getSizes(sizes, 0);
+            return sizes;
         }
         Node * getRoot() {return root;}
 };

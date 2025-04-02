@@ -104,12 +104,13 @@ int main() {
 
     // view encodings, not needed
     unordered_map<char, int> encodings = forest[0]->getEncodings();
+    unordered_map<char, int> pathSizes = forest[0]->getPathSizes();
     for (auto i: encodings) {
         bitset<32> enc(i.second);
         if (i.first != '\n') {
             cout << i.first << " " << enc << endl;
         } else {
-            cout << "\n" << " " << enc << endl;
+            cout << "\\n" << " " << enc << endl;
         }
     }
 
@@ -122,15 +123,37 @@ int main() {
     char curr;
     while (ifs.get(curr)) {
         unsigned long long int enc = encodings[curr];
-        int length = enc != 0 ? log2(enc) + 1 : 2; // TODO: for this input file specifically, needs to be changed
+        int length = pathSizes[curr];
         bw.write_bits(length, enc);
     }
+    bw.flush();
 
     // ---------- Decoding --------------
     // read and construct tree from file
     Tree conTree("treeOut");
 
     // read encoding and output uncompressed file
+    ofstream ofs("uncomp.txt");
+    BitReader main_br = *(conTree.getBR()); // get BR already progressed past tree
+
+    main_br.read_bit(); // have to do these calls,  TODO: fix
+    main_br.read_bit();
+    main_br.read_bit();
+
+    while (main_br.valid_data_remaining() >= 1) { // one char
+        // read one encoded char using tree
+        Node * currNode = conTree.getRoot();
+        while (true) {  // one bit
+            
+            if (currNode->getChar() != -1) { // leaf
+                ofs.put(currNode->getChar());
+                ofs.flush();
+                break;
+            }
+            if (main_br.read_bit() == 0) currNode = currNode->getLeft(); // inner, continue down path
+            else currNode = currNode->getRight();
+        }
+    }
 
     return 0;
 }
