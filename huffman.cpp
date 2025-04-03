@@ -60,8 +60,8 @@ void getCharFreq(string filename, vector<entry> &chars) {
 void CreateHuffmanTree(vector<Tree*> &forest) {
     while (forest.size() > 1) {
         // find two smallest weighted trees and remove from forest
-        int min1 = 1000, minInd1 = 0;
-        int min2 = 1000, minInd2 = 0; // TODO: better values
+        int min1 = INT_MAX, minInd1 = 0;
+        int min2 = INT_MAX, minInd2 = 0; // TODO: better values
         for (int i = 0; (size_t) i < forest.size(); i++) {
             if (int curr = forest[i]->getRoot()->getCount() < min1) {
                 min1 = curr;
@@ -84,10 +84,14 @@ void CreateHuffmanTree(vector<Tree*> &forest) {
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        cout << "usage: ./huffman <file>" << endl;
+        exit(1);
+    }
     // ---------- Encoding --------------
     vector<entry> chars;
-    getCharFreq("lorem.txt", chars);  
+    getCharFreq(argv[1], chars);  
 
     // initialize forest with singleton trees
     vector<Tree*> forest;
@@ -118,7 +122,7 @@ int main() {
     forest[0]->WriteTree("treeOut");
 
     // write encoded data to file
-    ifstream ifs("lorem.txt");
+    ifstream ifs(argv[1]);
     BitWriter bw("treeOut");
     char curr;
     while (ifs.get(curr)) {
