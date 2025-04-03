@@ -10,6 +10,11 @@
 
 using namespace std;
 
+union charCountUnion {
+    char c[4];
+    int count;
+};
+
 void print_vec(const vector<entry> &vec) {
     stringstream ss;
     for(size_t i = 0; i < vec.size(); i++)
@@ -34,10 +39,11 @@ void PrintForest(vector<Tree*> &f) {
     cout << endl;
 }
 
-void getCharFreq(string filename, vector<entry> &chars) {
+int getCharFreq(string filename, vector<entry> &chars) {
     ifstream ifs(filename, ifstream::in);
-
+    int charCount = 0;
     while (ifs.good()) {
+        charCount++;
         char c = ifs.get();
         int found_index = -1;
         for (int i = 0; (size_t) i < chars.size(); i++) {
@@ -55,6 +61,7 @@ void getCharFreq(string filename, vector<entry> &chars) {
     }
 
     ifs.close();
+    return charCount;
 }
 
 void CreateHuffmanTree(vector<Tree*> &forest) {
@@ -89,10 +96,10 @@ int main(int argc, char *argv[]) {
         cout << "usage: ./huffman <file>" << endl;
         exit(1);
     }
+    charCountUnion countUn = {{0}};
     // ---------- Encoding --------------
     vector<entry> chars;
-    getCharFreq(argv[1], chars);  
-
+    int charCount = getCharFreq(argv[1], chars); // populate entry vector and get total char count
     // initialize forest with singleton trees
     vector<Tree*> forest;
     for (int i = 0; (size_t) i < chars.size(); i++) {
@@ -121,10 +128,14 @@ int main(int argc, char *argv[]) {
     // write tree to file and receive tree's BitWriter
     BitWriter bw = forest[0]->WriteTree("treeOut");
 
+    // write number of characters
+    bw.write_bits(32, (unsigned long long int) charCount);
+
     // write encoded data to file
     ifstream ifs(argv[1]);
     char curr;
-    while (ifs.get(curr)) {
+    for (int i = 0; i < charCount; i++) {
+        ifs.get(curr);
         unsigned long long int enc = encodings[curr];
         int length = pathSizes[curr];
         bw.write_bits(length, enc);
@@ -139,7 +150,14 @@ int main(int argc, char *argv[]) {
     ofstream ofs("uncomp.txt");
     BitReader main_br = *(conTree.getBR()); // get BR already progressed past tree
 
-    while (main_br.valid_data_remaining() >= 1) { // one char
+    // read number of characters
+    for (int i = 3; i >= 0; i--) {
+        countUn.c[i] = main_br.read_char();
+    }
+    int recCharCount = countUn.count;
+
+    for (int i = 0; i < recCharCount-1; i++) { // one char
+        if (main_br.valid_data_remaining() <= 0) break;
         // read one encoded char using tree
         Node * currNode = conTree.getRoot();
         while (true) {  // one bit
