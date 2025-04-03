@@ -36,7 +36,6 @@ void BitWriter::_write() { // write bits until count < 8
     while (counter >= 8) {
         char byte = (char) (buffer >> 56);
         out->put(byte);
-        out->flush();
         buffer <<= 8;
         counter -= 8;
     }

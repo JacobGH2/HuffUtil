@@ -146,13 +146,13 @@ int main(int argc, char *argv[]) {
             
             if (currNode->getChar() != -1) { // leaf
                 ofs.put(currNode->getChar());
-                ofs.flush();
                 break;
             }
             if (main_br.read_bit() == 0) currNode = currNode->getLeft(); // inner, continue down path
             else currNode = currNode->getRight();
         }
     }
+    ofs.flush();
 
     return 0;
 }
