@@ -110,11 +110,11 @@ class Tree {
         BitReader* getBR() {
             return br;
         }
-        void WriteTree(string filename) {
+        BitWriter WriteTree(string filename) {
             BitWriter outfile(filename);
             root->writeTree(outfile);
 
-            outfile.flush();
+            return outfile;  
         }
         unordered_map<char, int> getEncodings() {
             unordered_map<char, int> enc;

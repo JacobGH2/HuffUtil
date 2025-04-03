@@ -7,7 +7,7 @@ OBJS = $(SRCS:.cpp=.o)
 huffman: ${OBJS}
 	${CC} ${CFLAGS} $^ -o $@
 
-%.o: %.cpp
+%.o: %.cpp %.h
 	${CC} ${CFLAGS} -c $< -o $@
 
 clean:

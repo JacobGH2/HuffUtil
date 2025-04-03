@@ -118,12 +118,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // write tree to file
-    forest[0]->WriteTree("treeOut");
+    // write tree to file and receive tree's BitWriter
+    BitWriter bw = forest[0]->WriteTree("treeOut");
 
     // write encoded data to file
     ifstream ifs(argv[1]);
-    BitWriter bw("treeOut");
     char curr;
     while (ifs.get(curr)) {
         unsigned long long int enc = encodings[curr];
@@ -139,10 +138,6 @@ int main(int argc, char *argv[]) {
     // read encoding and output uncompressed file
     ofstream ofs("uncomp.txt");
     BitReader main_br = *(conTree.getBR()); // get BR already progressed past tree
-
-    main_br.read_bit(); // have to do these calls,  TODO: fix
-    main_br.read_bit();
-    main_br.read_bit();
 
     while (main_br.valid_data_remaining() >= 1) { // one char
         // read one encoded char using tree
