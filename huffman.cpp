@@ -84,6 +84,10 @@ void CreateHuffmanTree(vector<Tree*> &forest) {
         }
         // create new tree with sum
         Tree *joinedTree = new Tree(forest[minInd1], forest[minInd2]);
+        forest[minInd1]->setRootNull();
+        forest[minInd2]->setRootNull();
+        delete forest[minInd1];
+        delete forest[minInd2];
         forest.erase(forest.begin() + std::max(minInd1, minInd2));
         forest.erase(forest.begin() + std::min(minInd1, minInd2));
         // add tree to forest
@@ -140,22 +144,24 @@ int main(int argc, char *argv[]) {
     ifs.close();
     bw.flush();
 
+    delete forest[0];
+
     // ---------- Decoding --------------
     // read and construct tree from file
     Tree conTree("treeOut");
 
     // read encoding and output uncompressed file
     ofstream ofs("uncomp.txt");
-    BitReader main_br = *(conTree.getBR()); // get BR already progressed past tree
+    BitReader * main_br = conTree.getBR(); // get BR already progressed past tree
 
     // read number of characters
     for (int i = 3; i >= 0; i--) {
-        countUn.c[i] = main_br.read_char();
+        countUn.c[i] = main_br->read_char();
     }
     int recCharCount = countUn.count;
 
     for (int i = 0; i < recCharCount-1; i++) { // one char
-        if (main_br.valid_data_remaining() <= 0) break;
+        if (main_br->valid_data_remaining() <= 0) break;
         // read one encoded char using tree
         Node * currNode = conTree.getRoot();
         while (true) {  // one bit
@@ -164,7 +170,7 @@ int main(int argc, char *argv[]) {
                 ofs.put(currNode->getChar());
                 break;
             }
-            if (main_br.read_bit() == 0) currNode = currNode->getLeft(); // inner, continue down path
+            if (main_br->read_bit() == 0) currNode = currNode->getLeft(); // inner, continue down path
             else currNode = currNode->getRight();
         }
     }

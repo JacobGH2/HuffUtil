@@ -39,6 +39,10 @@ class Node {
             }
             count = -1;
         }
+        ~Node() {
+            delete lChild;
+            delete rChild;
+        }
         void Print() {
             cout << ch << endl;
             if (lChild != nullptr) lChild->Print();
@@ -106,6 +110,7 @@ class Tree {
         }
         ~Tree() {
             delete br;
+            delete root;
         }
         void Print() {
             root->Print();
@@ -130,6 +135,9 @@ class Tree {
             // traversal
             this->root->getSizes(sizes, 0);
             return sizes;
+        }
+        void setRootNull() {
+            this->root = nullptr;
         }
         Node * getRoot() {return root;}
 };
