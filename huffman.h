@@ -104,6 +104,9 @@ class Tree {
             br = new BitReader(filename);
             root = new Node(br, 0); 
         }
+        ~Tree() {
+            delete br;
+        }
         void Print() {
             root->Print();
         }

@@ -8,6 +8,7 @@ BitReader::BitReader(string filename) {
 }
 
 BitReader::~BitReader() {
+    ifs->close();
     delete ifs;
 }
 

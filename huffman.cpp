@@ -108,22 +108,19 @@ int main(int argc, char *argv[]) {
         forest.push_back(newTree);
     }
 
-    cout << "forest size: " << forest.size() << endl;
     CreateHuffmanTree(forest); // merge trees into huffman tree
-    cout << "-------" << endl;
-    cout << "forest size: " << forest.size() << endl;
 
     // view encodings, not needed
     unordered_map<char, int> encodings = forest[0]->getEncodings();
     unordered_map<char, int> pathSizes = forest[0]->getPathSizes();
-    for (auto i: encodings) {
+    /* for (auto i: encodings) {
         bitset<32> enc(i.second);
         if (i.first != '\n') {
             cout << i.first << " " << enc << endl;
         } else {
             cout << "\\n" << " " << enc << endl;
         }
-    }
+    } */
 
     // write tree to file and receive tree's BitWriter
     BitWriter bw = forest[0]->WriteTree("treeOut");
@@ -140,6 +137,7 @@ int main(int argc, char *argv[]) {
         int length = pathSizes[curr];
         bw.write_bits(length, enc);
     }
+    ifs.close();
     bw.flush();
 
     // ---------- Decoding --------------
@@ -171,6 +169,7 @@ int main(int argc, char *argv[]) {
         }
     }
     ofs.flush();
+    ofs.close();
 
     return 0;
 }

@@ -7,6 +7,7 @@ BitWriter::BitWriter(string filename) {
 }
 
 BitWriter::~BitWriter() {
+    out->close();
     delete out;
 }
 
