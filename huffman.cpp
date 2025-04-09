@@ -95,15 +95,10 @@ void CreateHuffmanTree(vector<Tree*> &forest) {
     }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        cout << "usage: ./huffman <file>" << endl;
-        exit(1);
-    }
-    charCountUnion countUn = {{0}};
+void huffmanEncode(string inFile) {
     // ---------- Encoding --------------
     vector<entry> chars;
-    int charCount = getCharFreq(argv[1], chars); // populate entry vector and get total char count
+    int charCount = getCharFreq(inFile, chars); // populate entry vector and get total char count
     // initialize forest with singleton trees
     vector<Tree*> forest;
     for (int i = 0; (size_t) i < chars.size(); i++) {
@@ -133,7 +128,7 @@ int main(int argc, char *argv[]) {
     bw.write_bits(32, (unsigned long long int) charCount);
 
     // write encoded data to file
-    ifstream ifs(argv[1]);
+    ifstream ifs(inFile);
     char curr;
     for (int i = 0; i < charCount; i++) {
         ifs.get(curr);
@@ -145,15 +140,18 @@ int main(int argc, char *argv[]) {
     bw.flush();
 
     delete forest[0];
+}
 
+void huffmanDecode(string inFile) {
     // ---------- Decoding --------------
     // read and construct tree from file
-    Tree conTree("treeOut");
+    Tree conTree(inFile);
 
     // read encoding and output uncompressed file
     ofstream ofs("uncomp.txt");
     BitReader * main_br = conTree.getBR(); // get BR already progressed past tree
 
+    charCountUnion countUn = {{0}};
     // read number of characters
     for (int i = 3; i >= 0; i--) {
         countUn.c[i] = main_br->read_char();
@@ -176,6 +174,4 @@ int main(int argc, char *argv[]) {
     }
     ofs.flush();
     ofs.close();
-
-    return 0;
 }
