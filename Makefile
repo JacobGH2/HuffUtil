@@ -4,7 +4,7 @@ CC = g++
 SRCS = huffman.cpp BitReader.cpp BitWriter.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-huffman: ${OBJS} cli.o
+HuffUtil: ${OBJS} cli.o
 	${CC} ${CFLAGS} $^ -o $@
 
 cli.o: cli.cpp
@@ -14,4 +14,4 @@ cli.o: cli.cpp
 	${CC} ${CFLAGS} -c $< -o $@
 
 clean:
-	rm huffman treeOut ${OBJS} cli.o uncomp.txt
+	rm huffman treeOut ${OBJS} cli.o uncomp.txt HuffUtil

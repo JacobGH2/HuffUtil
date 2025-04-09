@@ -121,8 +121,9 @@ void huffmanEncode(string inFile) {
         }
     } */
 
+    string outFile = inFile.substr(0, inFile.find(".txt")) + string(".huff");
     // write tree to file and receive tree's BitWriter
-    BitWriter bw = forest[0]->WriteTree("treeOut");
+    BitWriter bw = forest[0]->WriteTree(outFile);
 
     // write number of characters
     bw.write_bits(32, (unsigned long long int) charCount);
@@ -148,7 +149,8 @@ void huffmanDecode(string inFile) {
     Tree conTree(inFile);
 
     // read encoding and output uncompressed file
-    ofstream ofs("uncomp.txt");
+    string outFile = inFile.substr(0, inFile.find(".huff")) + string(".txt.uncomp");
+    ofstream ofs(outFile);
     BitReader * main_br = conTree.getBR(); // get BR already progressed past tree
 
     charCountUnion countUn = {{0}};
